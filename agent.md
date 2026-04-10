@@ -43,6 +43,28 @@ L’IA doit implémenter manuellement:
 ### 3.3 Évaluation
 - Viser une accuracy >= 98%
 
+## 3.b) Infos utiles des annexes (à respecter)
+L’IA doit connaître et suivre les bases mathématiques de l’annexe:
+
+- Hypothèse logistique:
+  - $h_\theta(x) = g(\theta^T x)$
+  - $g(z) = \frac{1}{1 + e^{-z}}$
+
+- Fonction de coût (binaire, utilisée dans one-vs-all):
+  - $J(\theta) = -\frac{1}{m}\sum_{i=1}^{m}\left[y^{(i)}\log(h_\theta(x^{(i)})) + (1-y^{(i)})\log(1-h_\theta(x^{(i)}))\right]$
+
+- Gradient (descente de gradient):
+  - $\frac{\partial J(\theta)}{\partial \theta_j} = \frac{1}{m}\sum_{i=1}^{m}(h_\theta(x^{(i)})-y^{(i)})x_j^{(i)}$
+
+Implication pratique pour l’IA:
+- implémenter ces formules de manière explicite,
+- ajouter une stabilité numérique minimale (ex: `clip` avant `log`),
+- appliquer en one-vs-all pour 4 maisons.
+
+Annexe visualisation:
+- les 3 visualisations demandées (`histogram`, `scatter plot`, `pair plot`) font partie du mandatory,
+- les figures doivent être lisibles et exploitables pour justifier les choix de features.
+
 ## 4) Données et conventions
 Dataset principal: `datasets/dataset_train.csv`
 

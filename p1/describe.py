@@ -17,6 +17,28 @@ def std(values):
     return math.sqrt(sum((x - m) ** 2 for x in values) / (n - 1))
 
 
+def minimum(values):
+    values = list(values)
+    if not values:
+        return float('nan')
+    m = values[0]
+    for v in values[1:]:
+        if v < m:
+            m = v
+    return float(m)
+
+
+def maximum(values):
+    values = list(values)
+    if not values:
+        return float('nan')
+    m = values[0]
+    for v in values[1:]:
+        if v > m:
+            m = v
+    return float(m)
+
+
 def percentile(values, p):
     values = sorted(values)
     n = len(values)
@@ -54,11 +76,11 @@ def describe(dataset, max_features=None):
         ("Count",[len(num_df[c].dropna())              for c in columns]),
         ("Mean", [mean(num_df[c].dropna())             for c in columns]),
         ("Std",  [std(num_df[c].dropna())              for c in columns]),
-        ("Min",  [min(num_df[c].dropna())              for c in columns]),
+        ("Min",  [minimum(num_df[c].dropna())              for c in columns]),
         ("25%",  [percentile(num_df[c].dropna(), 0.25) for c in columns]),
         ("50%",  [percentile(num_df[c].dropna(), 0.50) for c in columns]),
         ("75%",  [percentile(num_df[c].dropna(), 0.75) for c in columns]),
-        ("Max",  [max(num_df[c].dropna())              for c in columns]),
+        ("Max",  [maximum(num_df[c].dropna())              for c in columns]),
     ]
 
     print("".ljust(8) + " " + " ".join(trunc(c).rjust(cell_width) for c in columns))

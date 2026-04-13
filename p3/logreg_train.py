@@ -1,5 +1,11 @@
 import sys
-from data_utils import impute_median_train, load_csv, split_features_target
+from data_utils import (
+	apply_standardizer,
+	fit_standardizer,
+	impute_median_train,
+	load_csv,
+	split_features_target,
+)
 
 
 def parse_args() -> str:
@@ -20,12 +26,19 @@ def main() -> None:
 	missing_before = int(X.isna().sum().sum())
 	X, medians = impute_median_train(X)
 	missing_after = int(X.isna().sum().sum())
+	means, stds = fit_standardizer(X)
+	X = apply_standardizer(X, means, stds)
 	print(f"Loaded CSV: {train_csv}")
 	print(f"Shape: {df.shape[0]} rows, {df.shape[1]} columns")
 	print(f"Selected features: {X.shape[1]} numeric columns")
 	print(f"Target column: Hogwarts House ({y.shape[0]} labels)")
 	print(f"Missing numeric values before imputation: {missing_before}")
 	print(f"Missing numeric values after imputation: {missing_after}")
+	print("Normalization check (first 3 columns):")
+	for col in X.columns[:3]:
+		print(
+			f"- {col}: mean={X[col].mean():.4f}, std={X[col].std():.4f}"
+		)
 	print("Feature columns used by the model:")
 	for col in X.columns:
 		print(f"- {col}")

@@ -1,19 +1,4 @@
-from pathlib import Path
-
 import pandas as pd
-
-
-def load_csv(path: str) -> pd.DataFrame:
-	"""Load a CSV file and validate common error cases."""
-	csv_path = Path(path)
-	if not csv_path.exists():
-		raise FileNotFoundError(f"File not found: {csv_path}")
-
-	df = pd.read_csv(csv_path)
-	if df.empty:
-		raise ValueError(f"Empty CSV file: {csv_path}")
-
-	return df
 
 
 def split_features_target(
@@ -21,13 +6,7 @@ def split_features_target(
 	target_col: str = "Hogwarts House",
 	exclude_cols: tuple[str, ...] = ("Index",),
 ) -> tuple[pd.DataFrame, pd.Series]:
-	"""Split dataset into numeric features X and target labels y.
-
-	Rules:
-	- Keep only numeric feature columns.
-	- Exclude columns listed in exclude_cols from features.
-	- Target must exist in train dataset.
-	"""
+	"""Split dataset into numeric features X and target labels y."""
 	if target_col not in df.columns:
 		raise ValueError(f"Missing target column: {target_col}")
 
@@ -44,12 +23,7 @@ def split_features_target(
 
 
 def impute_median_train(X: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
-	"""Fit median values on train features and impute missing values.
-
-	Returns:
-		X_imputed: train features with NaN replaced by column medians.
-		medians: median per feature column, to reuse on test/predict.
-	"""
+	"""Fit train medians and impute missing values in train features."""
 	medians = X.median(numeric_only=True)
 	X_imputed = X.fillna(medians)
 	return X_imputed, medians
@@ -62,12 +36,7 @@ def impute_with_train_medians(X: pd.DataFrame, medians: pd.Series) -> pd.DataFra
 
 
 def fit_standardizer(X: pd.DataFrame) -> tuple[pd.Series, pd.Series]:
-	"""Fit z-score standardization parameters on train features.
-
-	Returns:
-		means: mean value per feature column.
-		stds: std value per feature column (with zero std replaced by 1.0).
-	"""
+	"""Fit z-score standardization parameters on train features."""
 	means = X.mean(numeric_only=True)
 	stds = X.std(numeric_only=True)
 	stds = stds.replace(0, 1.0)

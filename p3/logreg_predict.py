@@ -1,5 +1,5 @@
 import sys
-from data_utils import load_csv
+from io_utils import load_csv
 
 
 def parse_args() -> tuple[str, str]:

@@ -1,9 +1,11 @@
 import sys
-from data_utils import (
+import numpy as np
+from binary_logreg import train_binary_logreg_gd
+from io_utils import load_csv
+from preprocessing import (
 	apply_standardizer,
 	fit_standardizer,
 	impute_median_train,
-	load_csv,
 	split_features_target,
 )
 
@@ -19,6 +21,8 @@ def parse_args() -> str:
 
 	train_csv = sys.argv[1]
 	return train_csv
+
+
 def main() -> None:
 	train_csv = parse_args()
 	df = load_csv(train_csv)
@@ -48,6 +52,20 @@ def main() -> None:
 	print("First 5 target values:")
 	for value in y.head(5):
 		print(f"- {value}")
+
+	# First binary training step: Gryffindor vs all.
+	y_binary = (y == "Gryffindor").astype(float).to_numpy()
+	X_np = X.to_numpy(dtype=float)
+	w, b, loss_history = train_binary_logreg_gd(
+		X_np,
+		y_binary,
+		learning_rate=0.1,
+		epochs=1000,
+	)
+	print("Binary training done: Gryffindor vs all")
+	print(f"Initial loss: {loss_history[0]:.6f}")
+	print(f"Final loss:   {loss_history[-1]:.6f}")
+	print(f"Weights shape: {w.shape}, bias: {b:.6f}")
 
 
 if __name__ == "__main__":

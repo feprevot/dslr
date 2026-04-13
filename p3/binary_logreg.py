@@ -40,7 +40,28 @@ def train_binary_logreg_gd(
 	learning_rate: float = 0.1,
 	epochs: int = 1000,
 ) -> tuple[np.ndarray, float, list[float]]:
-	"""Train a binary logistic regression model with gradient descent."""
+	"""Train binary logistic regression with gradient descent.
+
+	Input:
+		X: feature matrix of shape (m, n)
+			- m = number of samples (students)
+			- n = number of features (courses)
+		y: binary labels of shape (m,), values in {0, 1}
+		learning_rate: update step size
+		epochs: number of optimization iterations
+
+	What happens each epoch:
+		1) compute linear scores z = X @ w + b
+		2) convert scores to probabilities with sigmoid
+		3) compute log-loss
+		4) compute gradients for w and b
+		5) update w and b to reduce loss
+
+	Returns:
+		w: learned weights (one weight per feature)
+		b: learned bias (global offset)
+		history: loss value at each epoch
+	"""
 	m, n = X.shape
 	w = np.zeros(n, dtype=float)
 	b = 0.0

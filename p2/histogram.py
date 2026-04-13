@@ -1,20 +1,31 @@
+import os
 import matplotlib.pyplot as plt
 import pandas as pd
 
 HOUSES = ["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]
 COLORS = ["#c0392b", "#f39c12", "#2980b9", "#27ae60"]
 
+DATASET_PATH = os.path.join(os.path.dirname(__file__), "../datasets/dataset_train.csv")
+
+def std(values):
+    values = list(values)
+    n = len(values)
+    if n < 2:
+        return 0.0
+    m = sum(values) / n
+    return (sum((x - m) ** 2 for x in values) / (n - 1)) ** 0.5
+
+
 def homogeneity_score(df, course):
     """Lower is more homogeneous: mean of std across houses."""
     stds = []
     for house in HOUSES:
         scores = df[df["Hogwarts House"] == house][course].dropna()
-        stds.append(scores.std())
+        stds.append(std(scores))
     return sum(stds) / len(stds)
 
 def main():
-    path = "datasets/dataset_train.csv"
-    df = pd.read_csv(path)
+    df = pd.read_csv(DATASET_PATH)
 
     # Just keep course (exclude non-course columns)
     courses = [

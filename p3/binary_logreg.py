@@ -2,12 +2,30 @@ import numpy as np
 
 
 def sigmoid(z: np.ndarray) -> np.ndarray:
-	"""Compute sigmoid probabilities from linear scores."""
+	"""Convert raw linear scores into probabilities in [0, 1].
+
+	Input:
+		z: any real-valued score(s), e.g. X @ w + b.
+
+	Output:
+		Probability value(s) where:
+		- large negative z -> close to 0
+		- z = 0 -> 0.5
+		- large positive z -> close to 1
+	"""
 	return 1.0 / (1.0 + np.exp(-z))
 
 
 def binary_log_loss(y_true: np.ndarray, y_prob: np.ndarray) -> float:
-	"""Compute binary cross-entropy loss with numeric stability."""
+	"""Measure prediction error for binary classification.
+    
+	Behavior:
+		- low loss when predictions are correct and confident
+		- high loss when predictions are wrong and confident
+
+	Numeric stability:
+		Probabilities are clipped away from 0 and 1 to avoid log(0).
+	"""
 	eps = 1e-15
 	y_prob = np.clip(y_prob, eps, 1 - eps)
 	loss = -np.mean(

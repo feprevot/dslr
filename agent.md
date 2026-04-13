@@ -91,7 +91,7 @@ Toujours garder les changements petits et testables.
 
 ## 6) Standards de code attendus
 - Python lisible et modulaire (fonctions courtes)
-- CLI claire (`sys.argv`/`argparse`) + messages d’erreur utiles
+- CLI claire via `sys.argv` uniquement + messages d’erreur utiles
 - séparation des responsabilités:
   - I/O CSV
   - calculs stats
@@ -139,6 +139,7 @@ Important:
 - Ne pas remplacer l’algorithme demandé par une API toute faite
 - Ne pas changer le format de sortie requis
 - Ne pas complexifier inutilement (priorité à la version robuste et simple)
+- Ne pas utiliser `argparse` ni `add_argument` dans ce repo
 
 ## 10) Format de réponse attendu de l’IA (quand elle assiste l’utilisateur)
 Toujours répondre en:

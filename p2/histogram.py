@@ -1,19 +1,15 @@
 import os
+import sys
 import matplotlib.pyplot as plt
 import pandas as pd
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from p1.describe import std
+
 
 HOUSES = ["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]
 COLORS = ["#c0392b", "#f39c12", "#2980b9", "#27ae60"]
 
 DATASET_PATH = os.path.join(os.path.dirname(__file__), "../datasets/dataset_train.csv")
-
-def std(values):
-    values = list(values)
-    n = len(values)
-    if n < 2:
-        return 0.0
-    m = sum(values) / n
-    return (sum((x - m) ** 2 for x in values) / (n - 1)) ** 0.5
 
 
 def homogeneity_score(df, course):

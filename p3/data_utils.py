@@ -59,3 +59,26 @@ def impute_with_train_medians(X: pd.DataFrame, medians: pd.Series) -> pd.DataFra
 	"""Impute missing values using medians learned from train data."""
 	X_imputed = X.fillna(medians)
 	return X_imputed
+
+
+def fit_standardizer(X: pd.DataFrame) -> tuple[pd.Series, pd.Series]:
+	"""Fit z-score standardization parameters on train features.
+
+	Returns:
+		means: mean value per feature column.
+		stds: std value per feature column (with zero std replaced by 1.0).
+	"""
+	means = X.mean(numeric_only=True)
+	stds = X.std(numeric_only=True)
+	stds = stds.replace(0, 1.0)
+	return means, stds
+
+
+def apply_standardizer(
+	X: pd.DataFrame,
+	means: pd.Series,
+	stds: pd.Series,
+) -> pd.DataFrame:
+	"""Apply z-score standardization using train means/stds."""
+	X_scaled = (X - means) / stds
+	return X_scaled

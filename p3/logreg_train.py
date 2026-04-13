@@ -1,4 +1,4 @@
-import argparse
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -28,16 +28,23 @@ def load_csv(path: str) -> pd.DataFrame:
 	return df
 
 
-def parse_args() -> argparse.Namespace:
-	parser = argparse.ArgumentParser(description="Logistic regression training")
-	parser.add_argument("train_csv", help="Path to dataset_train.csv")
-	return parser.parse_args()
+def parse_args() -> str:
+	"""Parse CLI args using sys.argv.
+
+	Expected usage:
+		python p3/logreg_train.py <train_csv>
+	"""
+	if len(sys.argv) != 2:
+		raise ValueError("Usage: python p3/logreg_train.py <train_csv>")
+
+	train_csv = sys.argv[1]
+	return train_csv
 
 
 def main() -> None:
-	args = parse_args()
-	df = load_csv(args.train_csv)
-	print(f"Loaded CSV: {args.train_csv}")
+	train_csv = parse_args()
+	df = load_csv(train_csv)
+	print(f"Loaded CSV: {train_csv}")
 	print(f"Shape: {df.shape[0]} rows, {df.shape[1]} columns")
 
 

@@ -1,4 +1,5 @@
 import pandas as pd
+from stats_utils import mean, median, std
 
 
 def split_features_target(
@@ -24,7 +25,11 @@ def split_features_target(
 
 def impute_median_train(X: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
 	"""Fit train medians and impute missing values in train features."""
-	medians = X.median(numeric_only=True)
+	median_map: dict[str, float] = {}
+	for col in X.columns:
+		values = [v for v in X[col] if pd.notna(v)]
+		median_map[col] = median(values)
+	medians = pd.Series(median_map)
 	X_imputed = X.fillna(medians)
 	return X_imputed, medians
 
@@ -37,9 +42,18 @@ def impute_with_train_medians(X: pd.DataFrame, medians: pd.Series) -> pd.DataFra
 
 def fit_standardizer(X: pd.DataFrame) -> tuple[pd.Series, pd.Series]:
 	"""Fit z-score standardization parameters on train features."""
-	means = X.mean(numeric_only=True)
-	stds = X.std(numeric_only=True)
-	stds = stds.replace(0, 1.0)
+	mean_map: dict[str, float] = {}
+	std_map: dict[str, float] = {}
+	for col in X.columns:
+		values = [v for v in X[col] if pd.notna(v)]
+		col_mean = mean(values)
+		col_std = std(values)
+		if col_std == 0 or col_std != col_std:  # zero or nan
+			col_std = 1.0
+		mean_map[col] = col_mean
+		std_map[col] = col_std
+	means = pd.Series(mean_map)
+	stds = pd.Series(std_map)
 	return means, stds
 
 

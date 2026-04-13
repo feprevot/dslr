@@ -1,4 +1,5 @@
 import numpy as np
+from stats_utils import array_mean
 
 
 def sigmoid(z: np.ndarray) -> np.ndarray:
@@ -28,9 +29,8 @@ def binary_log_loss(y_true: np.ndarray, y_prob: np.ndarray) -> float:
 	"""
 	eps = 1e-15
 	y_prob = np.clip(y_prob, eps, 1 - eps)
-	loss = -np.mean(
-		y_true * np.log(y_prob) + (1.0 - y_true) * np.log(1.0 - y_prob)
-	)
+	term = y_true * np.log(y_prob) + (1.0 - y_true) * np.log(1.0 - y_prob)
+	loss = -array_mean(term)
 	return float(loss)
 
 
@@ -75,7 +75,7 @@ def train_binary_logreg_gd(
 
 		error = y_prob - y
 		grad_w = (X.T @ error) / m
-		grad_b = float(np.mean(error))
+		grad_b = array_mean(error)
 
 		w -= learning_rate * grad_w
 		b -= learning_rate * grad_b

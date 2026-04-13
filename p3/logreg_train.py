@@ -8,6 +8,7 @@ from preprocessing import (
 	impute_median_train,
 	split_features_target,
 )
+from stats_utils import mean, std
 
 
 def parse_args() -> str:
@@ -40,8 +41,9 @@ def main() -> None:
 	print(f"Missing numeric values after imputation: {missing_after}")
 	print("Normalization check (first 3 columns):")
 	for col in X.columns[:3]:
+		col_values = [v for v in X[col] if v == v]
 		print(
-			f"- {col}: mean={X[col].mean():.4f}, std={X[col].std():.4f}"
+			f"- {col}: mean={mean(col_values):.4f}, std={std(col_values):.4f}"
 		)
 	print("Feature columns used by the model:")
 	for col in X.columns:

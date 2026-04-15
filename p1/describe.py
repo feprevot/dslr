@@ -50,6 +50,14 @@ def percentile(values, p):
     return float(values[lo] + (values[hi] - values[lo]) * (pos - lo))
 
 
+def value_range(values):
+    values = list(values)
+    if not values:
+        return float('nan')
+    return maximum(values) - minimum(values)
+
+
+
 def describe(dataset, max_features=None):
     df = pd.read_csv(dataset)
     num_df = df.select_dtypes(include=["number"]).drop(columns=["Index"], errors="ignore")
@@ -71,7 +79,11 @@ def describe(dataset, max_features=None):
     def trunc(s):
         return s[:max_col_display - 2] + ".." if len(s) > max_col_display else s
 
+    total_rows = len(df)
+
     rows = [
+        ("Missing",  [total_rows - len(num_df[c].dropna()) for c in columns]),
+        ("Missing%", [((total_rows - len(num_df[c].dropna())) / total_rows * 100.0) if total_rows else float('nan') for c in columns]),
         ("Count",[len(num_df[c].dropna())              for c in columns]),
         ("Mean", [mean(num_df[c].dropna())             for c in columns]),
         ("Std",  [std(num_df[c].dropna())              for c in columns]),
@@ -80,6 +92,7 @@ def describe(dataset, max_features=None):
         ("50%",  [percentile(num_df[c].dropna(), 0.50) for c in columns]),
         ("75%",  [percentile(num_df[c].dropna(), 0.75) for c in columns]),
         ("Max",  [maximum(num_df[c].dropna())          for c in columns]),
+        ("Range",[value_range(num_df[c].dropna())      for c in columns]),
     ]
 
     print("".ljust(8) + " " + " ".join(trunc(c).rjust(cell_width) for c in columns))

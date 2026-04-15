@@ -24,15 +24,60 @@ def parse_args() -> str:
 	return train_csv
 
 
-def main() -> None:
-	train_csv = parse_args()
-	df = load_csv(train_csv)
+def preprocess_train_data(df):
+	"""Split, impute missing values, and standardize training features."""
 	X, y = split_features_target(df)
 	missing_before = int(X.isna().sum().sum())
 	X, medians = impute_median_train(X)
 	missing_after = int(X.isna().sum().sum())
 	means, stds = fit_standardizer(X)
 	X = apply_standardizer(X, means, stds)
+	return X, y, medians, means, stds, missing_before, missing_after
+
+
+def build_model_dict(features, houses, medians, means, stds):
+	"""Build the serializable model container."""
+	return {
+		"features": features,
+		"houses": houses,
+		"weights": {},
+		"bias": {},
+		"train_medians": medians.tolist(),
+		"train_means": means.tolist(),
+		"train_stds": stds.tolist(),
+	}
+
+
+def train_one_vs_all(X_np, y_np, houses, model_dict):
+	"""Train one binary classifier per house and store parameters."""
+	for house in houses:
+		print(f"Training {house} vs all...")
+		y_binary = (y_np == house).astype(float)
+
+		w, b, loss_history = train_binary_logreg_gd(
+			X_np,
+			y_binary,
+			learning_rate=0.1,
+			epochs=1000,
+		)
+
+		model_dict["weights"][house] = w.tolist()
+		model_dict["bias"][house] = float(b)
+
+		print(f"  Initial loss: {loss_history[0]:.6f}")
+		print(f"  Final loss:   {loss_history[-1]:.6f}")
+
+
+def save_model(model_dict, output_path="model.json"):
+	"""Save model dictionary to a JSON file."""
+	with open(output_path, "w") as f:
+		json.dump(model_dict, f, indent=2)
+
+
+def main() -> None:
+	train_csv = parse_args()
+	df = load_csv(train_csv)
+	X, y, medians, means, stds, missing_before, missing_after = preprocess_train_data(df)
 
 	print(f"Loaded CSV: {train_csv}")
 	print(f"Shape: {df.shape[0]} rows, {df.shape[1]} columns")
@@ -48,43 +93,12 @@ def main() -> None:
 	features = list(X.columns)
 
 	# Train one-vs-all classifiers.
-	model_dict = {
-		"features": features,
-		"houses": houses,
-		"weights": {},
-		"bias": {},
-		"train_medians": medians.tolist(),
-		"train_means": means.tolist(),
-		"train_stds": stds.tolist(),
-	}
-
-	for house in houses:
-		print(f"Training {house} vs all...")
-		# Create binary label: 1 if house, 0 otherwise.
-		y_binary = (y_np == house).astype(float)
-		
-		# Train binary classifier.
-		w, b, loss_history = train_binary_logreg_gd(
-			X_np,
-			y_binary,
-			learning_rate=0.1,
-			epochs=1000,
-		)
-		
-		# Store weights and bias.
-		model_dict["weights"][house] = w.tolist()
-		model_dict["bias"][house] = float(b)
-		
-		print(f"  Initial loss: {loss_history[0]:.6f}")
-		print(f"  Final loss:   {loss_history[-1]:.6f}")
+	model_dict = build_model_dict(features, houses, medians, means, stds)
+	train_one_vs_all(X_np, y_np, houses, model_dict)
 
 	print()
 	print("All classifiers trained. Saving model...")
-	
-	# Save model to JSON.
-	with open("model.json", "w") as f:
-		json.dump(model_dict, f, indent=2)
-	
+	save_model(model_dict, "model.json")
 	print("Model saved to model.json")
 
 

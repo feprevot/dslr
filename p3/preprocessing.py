@@ -2,10 +2,25 @@ import pandas as pd
 from stats_utils import mean, median, std
 
 
+SELECTED_FEATURES = (
+	"Astronomy",
+	"Herbology",
+	"Divination",
+	"Muggle Studies",
+	"Ancient Runes",
+	"History of Magic",
+	"Transfiguration",
+	"Potions",
+	"Charms",
+	"Flying",
+)
+
+
 def split_features_target(
 	df: pd.DataFrame,
 	target_col: str = "Hogwarts House",
 	exclude_cols: tuple[str, ...] = ("Index",),
+	feature_cols: tuple[str, ...] | None = SELECTED_FEATURES,
 ) -> tuple[pd.DataFrame, pd.Series]:
 	"""Split dataset into numeric features X and target labels y."""
 	if target_col not in df.columns:
@@ -14,12 +29,20 @@ def split_features_target(
 	y = df[target_col].copy()
 
 	numeric_cols = df.select_dtypes(include="number").columns.tolist()
-	feature_cols = [col for col in numeric_cols if col not in exclude_cols]
 
-	if not feature_cols:
+	if feature_cols is None:
+		feature_cols_final = [col for col in numeric_cols if col not in exclude_cols]
+	else:
+		feature_cols_final = [
+			col
+			for col in feature_cols
+			if col in df.columns and col in numeric_cols and col not in exclude_cols
+		]
+
+	if not feature_cols_final:
 		raise ValueError("No numeric feature columns found after exclusions")
 
-	X = df[feature_cols].copy()
+	X = df[feature_cols_final].copy()
 	return X, y
 
 

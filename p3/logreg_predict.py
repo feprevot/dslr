@@ -5,6 +5,7 @@ import pandas as pd
 from io_utils import load_csv
 from binary_logreg import sigmoid
 from preprocessing import apply_standardizer, impute_with_train_medians
+from predict_report import print_prediction_summary, print_evaluation_report
 
 
 def parse_args() -> tuple[str, str, str | None]:
@@ -90,8 +91,8 @@ def save_houses_csv(df: pd.DataFrame, predictions: np.ndarray, output_path: str 
 	output.to_csv(output_path, index=False)
 
 
-def evaluate_with_truth(predictions_path: str, truth_csv: str) -> tuple[float, int, int]:
-	"""Compute concordance with a labeled truth CSV using Index + Hogwarts House."""
+def evaluate_with_truth(predictions_path: str, truth_csv: str) -> dict:
+	"""Build evaluation metrics using Index + Hogwarts House from truth and predictions."""
 	pred_df = pd.read_csv(predictions_path)
 	truth_df = pd.read_csv(truth_csv)
 
@@ -115,7 +116,40 @@ def evaluate_with_truth(predictions_path: str, truth_csv: str) -> tuple[float, i
 	accuracy = float(correct.mean())
 	correct_count = int(correct.sum())
 	row_count = int(len(merged))
-	return accuracy, correct_count, row_count
+
+	houses = sorted(set(merged["Hogwarts House_true"]).union(set(merged["Hogwarts House_pred"])))
+	cm = pd.crosstab(
+		merged["Hogwarts House_true"],
+		merged["Hogwarts House_pred"],
+		dropna=False,
+	).reindex(index=houses, columns=houses, fill_value=0)
+
+	per_house: list[dict] = []
+	for house in houses:
+		tp = int(cm.loc[house, house])
+		fp = int(cm[house].sum() - tp)
+		fn = int(cm.loc[house].sum() - tp)
+		support = int(cm.loc[house].sum())
+
+		precision = (tp / (tp + fp)) if (tp + fp) > 0 else 0.0
+		recall = (tp / (tp + fn)) if (tp + fn) > 0 else 0.0
+		f1 = (2.0 * precision * recall / (precision + recall)) if (precision + recall) > 0 else 0.0
+
+		per_house.append({
+			"house": house,
+			"precision": precision,
+			"recall": recall,
+			"f1": f1,
+			"support": support,
+		})
+
+	return {
+		"accuracy": accuracy,
+		"correct": correct_count,
+		"rows": row_count,
+		"per_house": per_house,
+		"confusion_matrix": cm,
+	}
 
 
 def main() -> None:
@@ -134,21 +168,24 @@ def main() -> None:
 	save_houses_csv(df, predictions, "houses.csv")
 	pred_series = pd.Series(predictions)
 	pred_counts = pred_series.value_counts().sort_index()
-
-	print(f"Loaded CSV: {test_csv}")
-	print(f"Shape: {df.shape[0]} rows, {df.shape[1]} columns")
-	print(f"Loaded model: {model_file}")
-	print(f"Selected features: {len(model['features'])}")
-	print(f"Missing values (selected features) before imputation: {missing_before}")
-	print(f"Missing values (selected features) after imputation:  {missing_after}")
-	print("Prediction distribution:")
-	for house, count in pred_counts.items():
-		print(f"  {house}: {int(count)}")
-	print(f"Predictions written to houses.csv ({len(predictions)} rows)")
+	print_prediction_summary(
+		test_csv=test_csv,
+		n_rows=df.shape[0],
+		n_cols=df.shape[1],
+		model_file=model_file,
+		n_features=len(model["features"]),
+		missing_before=missing_before,
+		missing_after=missing_after,
+		pred_counts=pred_counts,
+		n_predictions=len(predictions),
+	)
 
 	if truth_csv is not None:
-		acc, correct_count, row_count = evaluate_with_truth("houses.csv", truth_csv)
-		print(f"Concordance with truth: {acc * 100:.2f}% ({correct_count}/{row_count})")
+		try:
+			report = evaluate_with_truth("houses.csv", truth_csv)
+		except FileNotFoundError as exc:
+			raise SystemExit(f"Error: File not found: {truth_csv}") from exc
+		print_evaluation_report(report)
 
 
 if __name__ == "__main__":

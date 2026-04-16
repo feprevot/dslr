@@ -2,10 +2,11 @@ import sys
 import json
 import numpy as np
 import pandas as pd
-from io_utils import load_csv
-from binary_logreg import sigmoid
-from preprocessing import apply_standardizer, impute_with_train_medians
-from predict_report import print_prediction_summary, print_evaluation_report
+from utils.io_utils import load_csv
+from utils.binary_logreg import sigmoid
+from utils.preprocessing import apply_standardizer, impute_with_train_medians
+from reports.predict_report import print_prediction_summary, print_evaluation_report
+from reports.evaluation_report import evaluate_with_truth
 
 
 def parse_args() -> tuple[str, str, str | None]:
@@ -89,67 +90,6 @@ def save_houses_csv(df: pd.DataFrame, predictions: np.ndarray, output_path: str 
 		"Hogwarts House": predictions,
 	})
 	output.to_csv(output_path, index=False)
-
-
-def evaluate_with_truth(predictions_path: str, truth_csv: str) -> dict:
-	"""Build evaluation metrics using Index + Hogwarts House from truth and predictions."""
-	pred_df = pd.read_csv(predictions_path)
-	truth_df = pd.read_csv(truth_csv)
-
-	required = {"Index", "Hogwarts House"}
-	if not required.issubset(pred_df.columns):
-		raise ValueError(f"Predictions CSV must contain columns: {required}")
-	if not required.issubset(truth_df.columns):
-		raise ValueError(f"Truth CSV must contain columns: {required}")
-
-	merged = truth_df[["Index", "Hogwarts House"]].merge(
-		pred_df[["Index", "Hogwarts House"]],
-		on="Index",
-		how="inner",
-		suffixes=("_true", "_pred"),
-	)
-
-	if merged.empty:
-		raise ValueError("No matching Index values between truth and predictions")
-
-	correct = (merged["Hogwarts House_true"] == merged["Hogwarts House_pred"])
-	accuracy = float(correct.mean())
-	correct_count = int(correct.sum())
-	row_count = int(len(merged))
-
-	houses = sorted(set(merged["Hogwarts House_true"]).union(set(merged["Hogwarts House_pred"])))
-	cm = pd.crosstab(
-		merged["Hogwarts House_true"],
-		merged["Hogwarts House_pred"],
-		dropna=False,
-	).reindex(index=houses, columns=houses, fill_value=0)
-
-	per_house: list[dict] = []
-	for house in houses:
-		tp = int(cm.loc[house, house])
-		fp = int(cm[house].sum() - tp)
-		fn = int(cm.loc[house].sum() - tp)
-		support = int(cm.loc[house].sum())
-
-		precision = (tp / (tp + fp)) if (tp + fp) > 0 else 0.0
-		recall = (tp / (tp + fn)) if (tp + fn) > 0 else 0.0
-		f1 = (2.0 * precision * recall / (precision + recall)) if (precision + recall) > 0 else 0.0
-
-		per_house.append({
-			"house": house,
-			"precision": precision,
-			"recall": recall,
-			"f1": f1,
-			"support": support,
-		})
-
-	return {
-		"accuracy": accuracy,
-		"correct": correct_count,
-		"rows": row_count,
-		"per_house": per_house,
-		"confusion_matrix": cm,
-	}
 
 
 def main() -> None:

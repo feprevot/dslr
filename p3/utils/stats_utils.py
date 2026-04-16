@@ -4,7 +4,7 @@ import sys
 import numpy as np
 
 # Reuse manual stats from P1 to avoid duplicated implementations.
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 from p1.describe import mean, percentile, std  # noqa: E402
 
 

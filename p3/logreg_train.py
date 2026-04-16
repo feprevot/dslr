@@ -68,6 +68,27 @@ def train_one_vs_all(X_np, y_np, houses, model_dict):
 		print(f"  Final loss:   {loss_history[-1]:.6f}")
 
 
+def compute_training_accuracy(X_np, y_np, model_dict):
+	"""Compute training accuracy for the full one-vs-all model."""
+	houses = model_dict["houses"]
+	weights = model_dict["weights"]
+	bias = model_dict["bias"]
+
+	proba_list = []
+	for house in houses:
+		w = np.array(weights[house], dtype=float)
+		b = float(bias[house])
+		z = X_np @ w + b
+		p = 1.0 / (1.0 + np.exp(-z))
+		proba_list.append(p)
+
+	proba_matrix = np.column_stack(proba_list)
+	best_idx = np.argmax(proba_matrix, axis=1)
+	predictions = np.array([houses[i] for i in best_idx])
+	accuracy = float(np.mean(predictions == y_np))
+	return accuracy
+
+
 def save_model(model_dict, output_path="model.json"):
 	"""Save model dictionary to a JSON file."""
 	with open(output_path, "w") as f:
@@ -95,8 +116,10 @@ def main() -> None:
 	# Train one-vs-all classifiers.
 	model_dict = build_model_dict(features, houses, medians, means, stds)
 	train_one_vs_all(X_np, y_np, houses, model_dict)
+	train_accuracy = compute_training_accuracy(X_np, y_np, model_dict)
 
 	print()
+	print(f"Training accuracy: {train_accuracy:.4f}")
 	print("All classifiers trained. Saving model...")
 	save_model(model_dict, "model.json")
 	print("Model saved to model.json")

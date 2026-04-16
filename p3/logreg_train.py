@@ -51,7 +51,7 @@ def build_model_dict(features, houses, medians, means, stds):
 def train_one_vs_all(X_np, y_np, houses, model_dict):
 	"""Train one binary classifier per house and store parameters."""
 	for house in houses:
-		print(f"Training {house} vs all...")
+		print(f"[TRAIN] {house:<10} vs all")
 		y_binary = (y_np == house).astype(float)
 
 		w, b, loss_history = train_binary_logreg_gd(
@@ -64,8 +64,8 @@ def train_one_vs_all(X_np, y_np, houses, model_dict):
 		model_dict["weights"][house] = w.tolist()
 		model_dict["bias"][house] = float(b)
 
-		print(f"  Initial loss: {loss_history[0]:.6f}")
-		print(f"  Final loss:   {loss_history[-1]:.6f}")
+		print(f"        initial_loss = {loss_history[0]:.6f}")
+		print(f"        final_loss   = {loss_history[-1]:.6f}")
 
 
 def compute_training_accuracy(X_np, y_np, model_dict):
@@ -100,12 +100,16 @@ def main() -> None:
 	df = load_csv(train_csv)
 	X, y, medians, means, stds, missing_before, missing_after = preprocess_train_data(df)
 
-	print(f"Loaded CSV: {train_csv}")
-	print(f"Shape: {df.shape[0]} rows, {df.shape[1]} columns")
-	print(f"Selected features: {X.shape[1]} numeric columns")
-	print(f"Missing numeric values before imputation: {missing_before}")
-	print(f"Missing numeric values after imputation: {missing_after}")
-	print()
+	print("=" * 66)
+	print("LOGISTIC REGRESSION TRAINING".center(66))
+	print("=" * 66)
+	print("[DATA]")
+	print(f"  csv_path          : {train_csv}")
+	print(f"  shape             : {df.shape[0]} rows x {df.shape[1]} cols")
+	print(f"  selected_features : {X.shape[1]} numeric")
+	print(f"  missing_before    : {missing_before}")
+	print(f"  missing_after     : {missing_after}")
+	print("-" * 66)
 
 	# Get unique houses and convert to numpy.
 	X_np = X.to_numpy(dtype=float)
@@ -118,11 +122,13 @@ def main() -> None:
 	train_one_vs_all(X_np, y_np, houses, model_dict)
 	train_accuracy = compute_training_accuracy(X_np, y_np, model_dict)
 
-	print()
-	print(f"Training accuracy: {train_accuracy:.4f}")
-	print("All classifiers trained. Saving model...")
+	print("-" * 66)
+	print("[SUMMARY]")
+	print(f"  training_accuracy : {train_accuracy * 100:.2f}%")
+	print("  save_model        : model.json")
 	save_model(model_dict, "model.json")
-	print("Model saved to model.json")
+	print("  status            : done")
+	print("=" * 66)
 
 
 if __name__ == "__main__":

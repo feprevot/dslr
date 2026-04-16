@@ -30,7 +30,7 @@ def load_model(model_file: str) -> dict:
 	return model
 
 
-def prepare_test_features(df: pd.DataFrame, model: dict) -> np.ndarray:
+def prepare_test_features(df: pd.DataFrame, model: dict) -> tuple[np.ndarray, int, int]:
 	"""Select model features and apply train-time preprocessing params."""
 	features = model["features"]
 
@@ -39,15 +39,17 @@ def prepare_test_features(df: pd.DataFrame, model: dict) -> np.ndarray:
 		raise ValueError(f"Missing feature columns in test CSV: {missing_features}")
 
 	X = df[features].copy()
+	missing_before = int(X.isna().sum().sum())
 
 	medians = pd.Series(model["train_medians"], index=features)
 	means = pd.Series(model["train_means"], index=features)
 	stds = pd.Series(model["train_stds"], index=features)
 
 	X = impute_with_train_medians(X, medians)
+	missing_after = int(X.isna().sum().sum())
 	X = apply_standardizer(X, means, stds)
 
-	return X.to_numpy(dtype=float)
+	return X.to_numpy(dtype=float), missing_before, missing_after
 
 
 def predict_houses(X_np: np.ndarray, model: dict) -> np.ndarray:
@@ -88,13 +90,21 @@ def main() -> None:
 	test_csv, model_file = parse_args()
 	df = load_csv(test_csv)
 	model = load_model(model_file)
-	X_np = prepare_test_features(df, model)
+	X_np, missing_before, missing_after = prepare_test_features(df, model)
 	predictions = predict_houses(X_np, model)
 	save_houses_csv(df, predictions, "houses.csv")
+	pred_series = pd.Series(predictions)
+	pred_counts = pred_series.value_counts().sort_index()
 
 	print(f"Loaded CSV: {test_csv}")
 	print(f"Shape: {df.shape[0]} rows, {df.shape[1]} columns")
 	print(f"Loaded model: {model_file}")
+	print(f"Selected features: {len(model['features'])}")
+	print(f"Missing values (selected features) before imputation: {missing_before}")
+	print(f"Missing values (selected features) after imputation:  {missing_after}")
+	print("Prediction distribution:")
+	for house, count in pred_counts.items():
+		print(f"  {house}: {int(count)}")
 	print(f"Predictions written to houses.csv ({len(predictions)} rows)")
 
 

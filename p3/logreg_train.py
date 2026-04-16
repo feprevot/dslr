@@ -18,7 +18,7 @@ def parse_args() -> str:
 		python p3/logreg_train.py <train_csv>
 	"""
 	if len(sys.argv) != 2:
-		raise ValueError("Usage: python p3/logreg_train.py <train_csv>")
+		raise SystemExit("Usage: python p3/logreg_train.py <train_csv>")
 
 	train_csv = sys.argv[1]
 	return train_csv
@@ -97,7 +97,10 @@ def save_model(model_dict, output_path="model.json"):
 
 def main() -> None:
 	train_csv = parse_args()
-	df = load_csv(train_csv)
+	try:
+		df = load_csv(train_csv)
+	except FileNotFoundError as exc:
+		raise SystemExit(f"Error: {exc}") from exc
 	X, y, medians, means, stds, missing_before, missing_after = preprocess_train_data(df)
 
 	print("=" * 66)

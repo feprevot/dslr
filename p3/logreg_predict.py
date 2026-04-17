@@ -106,8 +106,6 @@ def main() -> None:
 	X_np, missing_before, missing_after = prepare_test_features(df, model)
 	predictions = predict_houses(X_np, model)
 	save_houses_csv(df, predictions, "houses.csv")
-	pred_series = pd.Series(predictions)
-	pred_counts = pred_series.value_counts().sort_index()
 	print_prediction_summary(
 		test_csv=test_csv,
 		n_rows=df.shape[0],
@@ -116,8 +114,7 @@ def main() -> None:
 		n_features=len(model["features"]),
 		missing_before=missing_before,
 		missing_after=missing_after,
-		pred_counts=pred_counts,
-		n_predictions=len(predictions),
+		predictions=predictions,
 	)
 
 	if truth_csv is not None:

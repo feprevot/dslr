@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 
@@ -9,10 +10,10 @@ def print_prediction_summary(
 	n_features: int,
 	missing_before: int,
 	missing_after: int,
-	pred_counts: pd.Series,
-	n_predictions: int,
+	predictions: np.ndarray,
 ) -> None:
 	"""Print concise prediction run information."""
+	pred_counts = pd.Series(predictions).value_counts().sort_index()
 	print(f"Loaded CSV: {test_csv}")
 	print(f"Shape: {n_rows} rows, {n_cols} columns")
 	print(f"Loaded model: {model_file}")
@@ -22,7 +23,7 @@ def print_prediction_summary(
 	print("Prediction distribution:")
 	for house, count in pred_counts.items():
 		print(f"  {house}: {int(count)}")
-	print(f"Predictions written to houses.csv ({n_predictions} rows)")
+	print(f"Predictions written to houses.csv ({len(predictions)} rows)")
 
 
 def print_evaluation_report(report: dict) -> None:

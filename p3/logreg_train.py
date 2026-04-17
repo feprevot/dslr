@@ -1,7 +1,7 @@
 import sys
 import json
 import numpy as np
-from logreg_utils.binary_logreg import train_binary_logreg_gd
+from logreg_utils.binary_logreg import train_binary_logreg_gd, sigmoid
 from logreg_utils.io_utils import load_csv
 from logreg_utils.preprocessing import (
 	apply_standardizer,
@@ -79,7 +79,7 @@ def compute_training_accuracy(X_np, y_np, model_dict):
 		w = np.array(weights[house], dtype=float)
 		b = float(bias[house])
 		z = X_np @ w + b
-		p = 1.0 / (1.0 + np.exp(-z))
+		p = sigmoid(z)
 		proba_list.append(p)
 
 	proba_matrix = np.column_stack(proba_list)

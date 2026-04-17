@@ -1,9 +1,9 @@
 import sys
 import json
 import numpy as np
-from utils.binary_logreg import train_binary_logreg_gd
-from utils.io_utils import load_csv
-from utils.preprocessing import (
+from logreg_utils.binary_logreg import train_binary_logreg_gd
+from logreg_utils.io_utils import load_csv
+from logreg_utils.preprocessing import (
 	apply_standardizer,
 	fit_standardizer,
 	impute_median_train,

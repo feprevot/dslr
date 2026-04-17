@@ -1,5 +1,5 @@
 import pandas as pd
-from utils.stats_utils import mean, median, std
+from utils import mean, median, std
 
 
 SELECTED_FEATURES = (

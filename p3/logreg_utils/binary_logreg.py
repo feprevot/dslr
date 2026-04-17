@@ -1,5 +1,9 @@
+import os
+import sys
 import numpy as np
-from utils.stats_utils import array_mean
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
+from utils import array_mean
 
 
 def sigmoid(z: np.ndarray) -> np.ndarray:

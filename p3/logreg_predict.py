@@ -2,9 +2,9 @@ import sys
 import json
 import numpy as np
 import pandas as pd
-from utils.io_utils import load_csv
-from utils.binary_logreg import sigmoid
-from utils.preprocessing import apply_standardizer, impute_with_train_medians
+from logreg_utils.io_utils import load_csv
+from logreg_utils.binary_logreg import sigmoid
+from logreg_utils.preprocessing import apply_standardizer, impute_with_train_medians
 from reports.predict_report import print_prediction_summary, print_evaluation_report
 from reports.evaluation_report import evaluate_with_truth
 

@@ -3,7 +3,7 @@ import sys
 import matplotlib.pyplot as plt
 import pandas as pd
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from p1.describe import std
+from utils import std
 
 
 HOUSES = ["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]

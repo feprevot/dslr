@@ -1,0 +1,12 @@
+.venv/
+
+model.json
+datasets/validation/
+
+__pycache__/
+*.pyc
+
+.DS_Store
+
+.vscode/
+

@@ -33,12 +33,12 @@ def train_binary_logreg_gd(
 	history: list[float] = []
 
 	for _ in range(epochs):
-		z = X @ w + b
-		y_prob = sigmoid(z)
-		loss = binary_log_loss(y, y_prob)
-		history.append(loss)
+		z = X @ w + b              # score for each student
+		y_prob = sigmoid(z)        # convert score to probability [0, 1]
+		loss = binary_log_loss(y, y_prob)  # measure error on probabilities
+		history.append(loss)       # saved for final display
 
-		error = y_prob - y
+		error = y_prob - y         # gap between prediction and truth → used to adjust w and b
 		grad_w = (X.T @ error) / m
 		grad_b = array_mean(error)
 

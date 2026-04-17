@@ -19,3 +19,7 @@ python p3/logreg_train.py datasets/validation/dataset_train_80.csv
 <!-- Predict on 20% split + show evaluation report -->
 
 python p3/logreg_predict.py datasets/validation/dataset_val_20.csv model.json datasets/validation/dataset_val_20.csv
+
+Précision : "quand il dit Gryffindor, a-t-il raison ?"
+Recall : "est-ce qu'il trouve tous les Gryffindors ?"
+Un modèle peut être précis mais rater des élèves, ou tout trouver mais faire des fausses alarmes.

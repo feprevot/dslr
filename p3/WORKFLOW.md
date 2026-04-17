@@ -148,7 +148,7 @@ Pour chaque maison dans `[Gryffondor, Poufsouffle, Serdaigle, Serpentard]` :
   z = X · w + b                    # score linéaire
   p = sigmoid(z) = 1 / (1 + e^-z)  # probabilité d'appartenir à cette maison
   loss = log-loss(p, y_binary)     # quantité d'erreur
-  gradients = ∂loss/∂w , ∂loss/∂b
+  gradients = ∂loss/∂w , ∂loss/∂b   # pente de l'erreur → direction de correction
   w = w - learning_rate * ∂loss/∂w
   b = b - learning_rate * ∂loss/∂b
   ```

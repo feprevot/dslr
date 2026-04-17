@@ -13,6 +13,9 @@ SELECTED_FEATURES = (
 	"Potions",
 	"Charms",
 	"Flying",
+    # "Arithmancy", # homogenous repartition between houses, don't keep it
+    # "Defense Against the Dark Arts", # same as Astronomy, don't keep it
+    # "Care of Magical Creatures", # homogenous repartition between houses, don't keep it
 )
 
 

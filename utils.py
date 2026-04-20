@@ -1,10 +1,12 @@
 import numpy as np
 
 def mean(values):
+    """Calculate the mean of a list of values."""
     values = list(values)
     return sum(values) / len(values) if values else float('nan')
 
 def std(values):
+    """Calculate the standard deviation of a list of values."""
     values = list(values)
     n = len(values)
     if n < 2:
@@ -13,6 +15,7 @@ def std(values):
     return (sum((x - m) ** 2 for x in values) / (n - 1)) ** 0.5
 
 def minimum(values):
+    """Calculate the minimum of a list of values."""
     values = list(values)
     if not values:
         return float('nan')
@@ -24,6 +27,7 @@ def minimum(values):
 
 
 def maximum(values):
+    """Calculate the maximum of a list of values."""
     values = list(values)
     if not values:
         return float('nan')
@@ -35,6 +39,7 @@ def maximum(values):
 
 
 def percentile(values, p):
+    """Calculate the p-th percentile of a list of values."""
     values = sorted(values)
     n = len(values)
     if n == 0:
@@ -47,6 +52,7 @@ def percentile(values, p):
 
 
 def value_range(values):
+    """Calculate the range (max - min) of a list of values."""
     values = list(values)
     if not values:
         return float('nan')
@@ -54,8 +60,8 @@ def value_range(values):
 
 
 def median(values) -> float:
-	"""Median helper reused in P3, built on top of P1 percentile implementation."""
-	return percentile(values, 0.5)
+    """Calculate the median of a list of values."""
+    return percentile(values, 0.5)
 
 
 def array_mean(arr: np.ndarray) -> float:

@@ -1,7 +1,7 @@
 import sys
 import json
 import numpy as np
-from logreg_utils.binary_logreg import train_binary_logreg_gd
+from logreg_utils.binary_logreg import train_binary_logreg_gd, sigmoid
 from logreg_utils.io_utils import load_csv
 from logreg_utils.preprocessing import (
 	apply_standardizer,
@@ -69,7 +69,7 @@ def train_one_vs_all(X_np, y_np, houses, model_dict):
 
 
 def compute_training_accuracy(X_np, y_np, model_dict):
-	"""Compute training accuracy for the full one-vs-all model."""
+	"""Run predictions on train data and return the % of correct house assignments."""
 	houses = model_dict["houses"]
 	weights = model_dict["weights"]
 	bias = model_dict["bias"]
@@ -79,7 +79,7 @@ def compute_training_accuracy(X_np, y_np, model_dict):
 		w = np.array(weights[house], dtype=float)
 		b = float(bias[house])
 		z = X_np @ w + b
-		p = 1.0 / (1.0 + np.exp(-z))
+		p = sigmoid(z)
 		proba_list.append(p)
 
 	proba_matrix = np.column_stack(proba_list)
@@ -114,7 +114,7 @@ def main() -> None:
 	print(f"  missing_after     : {missing_after}")
 	print("-" * 66)
 
-	# Get unique houses and convert to numpy.
+	# Get unique houses and convert to numpy to do matricial operations for all houses at once.
 	X_np = X.to_numpy(dtype=float)
 	y_np = y.to_numpy()
 	houses = sorted(np.unique(y_np))

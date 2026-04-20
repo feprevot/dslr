@@ -67,7 +67,8 @@ def impute_with_train_medians(X: pd.DataFrame, medians: pd.Series) -> pd.DataFra
 
 
 def fit_standardizer(X: pd.DataFrame) -> tuple[pd.Series, pd.Series]:
-	"""Fit z-score standardization parameters on train features."""
+	"""Learn scaling params from train data: compute mean and std per feature.
+	These are saved in model.json and reused at predict time to apply x' = (x - mean) / std."""
 	mean_map: dict[str, float] = {}
 	std_map: dict[str, float] = {}
 	for col in X.columns:
